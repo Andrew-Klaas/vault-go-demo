@@ -35,6 +35,8 @@ vault read database/creds/vault_go_demo
 vault secrets enable transit
 vault write -f transit/keys/my-key
 
+exit 0
+
 
 kubectl apply -f go_vault_demo/
 
