@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Andrew-klaas/vault-go-demo/users"
+	"github.com/Andrew-Klaas/vault-go-demo/users"
 )
 
 func main() {
