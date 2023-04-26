@@ -12,7 +12,7 @@ import (
 // 	user   User
 // }
 
-//User holds example user PII data
+// User holds example user PII data
 type User struct {
 	Cust_no string
 	First   string
@@ -23,7 +23,7 @@ type User struct {
 	Salary  float32
 }
 
-//GetRecords returns all customer records from the database
+// GetRecords returns all customer records from the database
 func GetRecords() ([]User, error) {
 	var err error
 
@@ -49,7 +49,7 @@ func GetRecords() ([]User, error) {
 	return users, nil
 }
 
-//GetUsers returns all customer records from the database
+// GetUsers returns all customer records from the database
 func GetUsers() ([]string, error) {
 	var err error
 

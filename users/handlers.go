@@ -11,7 +11,7 @@ import (
 	"github.com/Andrew-Klaas/vault-go-demo/config"
 )
 
-//Index ...
+// Index ...
 func Index(w http.ResponseWriter, req *http.Request) {
 
 	fmt.Printf("username: %v, password %v\n", config.AppDBuser.Username, config.AppDBuser.Password)
@@ -21,7 +21,13 @@ func Index(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//Dbview ...
+// Create a golang function that does a google oauth2 login
+func GoogleLogin(w http.ResponseWriter, req *http.Request) {
+	// fmt.Println("google login")
+
+}
+
+// Dbview ...
 func DbView(w http.ResponseWriter, req *http.Request) {
 
 	if req.Method != "GET" {
@@ -40,7 +46,7 @@ func DbView(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//Records ...
+// Records ...
 func Records(w http.ResponseWriter, req *http.Request) {
 
 	if req.Method != "GET" {
@@ -76,7 +82,7 @@ func Records(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//DbUserView ...
+// DbUserView ...
 func DbUserView(w http.ResponseWriter, req *http.Request) {
 
 	if req.Method != "GET" {
@@ -94,7 +100,7 @@ func DbUserView(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//Addrecord ...
+// Addrecord ...
 func Addrecord(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		f := req.FormValue("first")
@@ -154,7 +160,7 @@ func Addrecord(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-//UpdateRecord ...
+// UpdateRecord ...
 func UpdateRecord(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		cn := req.FormValue("cust_no")

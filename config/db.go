@@ -14,22 +14,32 @@ import (
 
 	"github.com/hashicorp/vault/api"
 	_ "github.com/lib/pq"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
-//DBuser holds DB user info
+// DBuser holds DB user info
 type DBuser struct {
 	Username string
 	Password string
 }
 
-//DB Connection
+// DB Connection
 var DB *sql.DB
 var AppDBuser DBuser
 var httpClient = &http.Client{
 	Timeout: 10 * time.Second,
 }
 
-//Vclient ...
+var conf = &oauth2.Config{
+	ClientID:     "", //Set in init. Read from Vault
+	ClientSecret: "", //Set in init. Read from Vault
+	Endpoint:     google.Endpoint,
+	RedirectURL:  "http://localhost:9090/oauth2/google/callback",
+	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+}
+
+// Vclient ...
 var Vclient, _ = api.NewClient(&api.Config{Address: "http://127.0.0.1:8200", HttpClient: httpClient})
 
 var tokenPath = "/var/run/secrets/kubernetes.io/serviceaccount/token"
@@ -59,7 +69,7 @@ func init() {
 	// token := secret.Auth.ClientToken
 
 	//Local
-	token := "root"
+	token := "password"
 
 	Vclient.SetToken(token)
 
@@ -101,6 +111,14 @@ func init() {
 	// SQLQuery = "INSERT INTO vault_go_demo (FIRST, LAST, SSN, ADDR, BDAY, SALARY) VALUES('Bill', 'Franklin', '111-22-8084', '222 Chicago Street', '1985-02-02', 180000.00);"
 	// DB.Exec(SQLQuery)
 
+	//setup Oauth2 config
+	oauth2VaultResp, err := Vclient.Logical().Read("secret/data/oauth2/config")
+	if err != nil {
+		log.Fatal(err)
+	}
+	oauth2Data := oauth2VaultResp.Data["data"].(map[string]interface{})
+	conf.ClientID = oauth2Data["client_id"].(string)
+	conf.ClientSecret = oauth2Data["client_secret"].(string)
 }
 
 // Create Table vault-go-demo (

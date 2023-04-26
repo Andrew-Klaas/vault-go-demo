@@ -35,6 +35,12 @@ vault read database/creds/vault_go_demo
 vault secrets enable transit
 vault write -f transit/keys/my-key
 
+#Set your google oauth2 app client_id and client_secret as env variables
+vault kv put secret/oauth2/config \
+    client_id=$CLIENT_ID \
+    client_secret=$CLIENT_SECRET
+
+
 exit 0
 
 

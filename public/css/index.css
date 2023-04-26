@@ -67,6 +67,19 @@ header div {
     color: whitesmoke;
     margin: 0 .5rem;
 }
+.sign-in-btn {
+    /* flex-grow: 1; */
+    padding: .2rem .5rem;
+    text-decoration: none;
+    background-color: rgb(216, 51, 76);
+    border-radius: 3px;
+    /* border: 1px solid black; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: whitesmoke;
+    margin: 0 .5rem;
+}
 .update-btn {
         /* flex-grow: 1; */
         padding: .2rem .5rem;
