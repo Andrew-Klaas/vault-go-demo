@@ -1,7 +1,8 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0 h1:eOI3/cP2VTU6uZLDYAoic+eyzzB9YyGmJ7eIjl8rOPg=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
-github.com/Andrew-klaas/vault-go-demo v0.0.0-20201230160600-b4d63000be6f h1:YG0xcpJoT7KO2XzjXWnqCdBOz7QlKvR1cI0gUsKwEws=
+github.com/Andrew-Klaas/vault-go-demo v0.0.0-20230426153019-71e9944980d9 h1:2BWf3hiLs2DBssuMM9k+49J7il9RfOykJal95+HGw8M=
+github.com/Andrew-Klaas/vault-go-demo v0.0.0-20230426153019-71e9944980d9/go.mod h1:4ZogWvM8BjAKBBBm1ResNd258hcxsKAhHHtfKXtaH3g=
 github.com/Andrew-klaas/vault-go-demo v0.0.0-20201230160600-b4d63000be6f/go.mod h1:l2P4I7OaWoe4zLgRIF8xL+DOXPpKTTaflC8GrFoj1qM=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
