@@ -31,7 +31,7 @@ var httpClient = &http.Client{
 	Timeout: 10 * time.Second,
 }
 
-var conf = &oauth2.Config{
+var Conf = &oauth2.Config{
 	ClientID:     "", //Set in init. Read from Vault
 	ClientSecret: "", //Set in init. Read from Vault
 	Endpoint:     google.Endpoint,
@@ -117,8 +117,8 @@ func init() {
 		log.Fatal(err)
 	}
 	oauth2Data := oauth2VaultResp.Data["data"].(map[string]interface{})
-	conf.ClientID = oauth2Data["client_id"].(string)
-	conf.ClientSecret = oauth2Data["client_secret"].(string)
+	Conf.ClientID = oauth2Data["client_id"].(string)
+	Conf.ClientSecret = oauth2Data["client_secret"].(string)
 }
 
 // Create Table vault-go-demo (

@@ -8,7 +8,8 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 
-RUN go get github.com/Andrew-Klaas/vault-go-demo
+RUN --mount=type=ssh \
+  go get github.com/Andrew-Klaas/vault-go-demo
 RUN go get github.com/hashicorp/hcl/hcl/ast
 RUN go get github.com/cenkalti/backoff/v3
 RUN go get github.com/hashicorp/vault/api
@@ -21,7 +22,7 @@ ENTRYPOINT /go/bin/vault-go-demo
 # Document that the service listens on port 8080.
 EXPOSE 9090
 
-#docker build -t aklaas2/vault-go-demo .;docker push aklaas2/vault-go-demo:latest
+#docker build -t aklaas2/vault-go-demo-oauth .;docker push aklaas2/vault-go-demo-oauth:latest
 
 
 # syntax=docker/dockerfile:1

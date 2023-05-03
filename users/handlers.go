@@ -1,15 +1,66 @@
 package users
 
 import (
+	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Andrew-Klaas/vault-go-demo/config"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
+	"golang.org/x/oauth2"
 )
+
+type SystemUser struct {
+	Username string
+	Password []byte
+}
+
+var UserDB = map[string]SystemUser{
+	"admin": SystemUser{
+		Username: "admin",
+		Password: []byte("admin"),
+	},
+}
+
+type CustomClaims struct {
+	jwt.StandardClaims
+	SID string
+	EXP time.Time
+}
+
+// Sessions tracks active sessions
+// TODO create JWT tokens
+// Key is sessionID and value is email address
+var sessions = map[string]string{}
+
+// OAuth Conns determines whether a user has been converted to our system from Oauth users
+// Key is oAuth User ID and Value is email address in our system
+// (our system, not Google - register)
+var oAuthConns = map[string]string{}
+
+// OAuthExp determines whether the Oauth user's token is still valid
+// Key is our system email address and value is time of expiration for their JWT tokens
+var oAuthExp = map[string]time.Time{}
+
+type googleResp struct {
+	ID            string `json:"id"`
+	Email         string `json:"email"`
+	VerifiedEmail bool   `json:"verified_email"`
+	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Picture       string `json:"picture"`
+	Locale        string `json:"locale"`
+}
 
 // Index ...
 func Index(w http.ResponseWriter, req *http.Request) {
@@ -24,7 +75,175 @@ func Index(w http.ResponseWriter, req *http.Request) {
 // Create a golang function that does a google oauth2 login
 func GoogleLogin(w http.ResponseWriter, req *http.Request) {
 	// fmt.Println("google login")
+	// if req.Method != http.MethodPost {
+	// 	msg := url.QueryEscape("Method not allowed")
+	// 	http.Redirect(w, req, "/?msg="+msg, http.StatusSeeOther)
+	// 	return
+	// }
 
+	sv := uuid.New()
+	url := config.Conf.AuthCodeURL(sv.String())
+	oAuthExp[sv.String()] = time.Now().Add(time.Hour)
+	http.Redirect(w, req, url, http.StatusSeeOther)
+}
+
+func GoogleCallback(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("google callback")
+	// get the code
+	ctx := context.Background()
+	code := req.FormValue("code")
+	if code == "" {
+		msg := url.QueryEscape("Code not found")
+		http.Redirect(w, req, "/?msg="+msg, http.StatusSeeOther)
+		return
+	}
+
+	state := req.FormValue("state")
+	if state == "" {
+		msg := url.QueryEscape("State not found")
+		http.Redirect(w, req, "/?msg="+msg, http.StatusSeeOther)
+		return
+	}
+
+	token, err := config.Conf.Exchange(ctx, code)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ts := config.Conf.TokenSource(req.Context(), token)
+
+	client := oauth2.NewClient(req.Context(), ts)
+	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo?alt=json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		log.Fatalf("Status code error: %v\n", resp.StatusCode)
+		return
+	}
+
+	fmt.Printf("Response: %v\n", resp)
+	//Read the response body into a byte array then convert to a json struct
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Body: %v\n", string(body))
+
+	var gr googleResp
+	err = json.Unmarshal(body, &gr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Google Response JSON: %v\n", gr)
+	fmt.Printf("Google response email: %v\n", gr.Email)
+
+	// Check if the user is already in our system
+	userEmail, ok := oAuthConns[gr.ID]
+	if !ok {
+		jwt := createToken(gr.ID)
+
+		// If not, we need to add user email address to our system
+		oAuthConns[gr.ID] = gr.Email
+
+		v := url.Values{}
+		v.Add("email", gr.Email)
+		v.Add("sst", jwt)
+		v.Add("name", gr.Name)
+		// We need to redirect them to the register page
+		http.Redirect(w, req, "/register?"+v.Encode(), http.StatusSeeOther)
+	}
+	// The user existed so create a session
+	err = createSession(userEmail, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	http.Redirect(w, req, "/addrecord", http.StatusSeeOther)
+}
+
+func Register(w http.ResponseWriter, r *http.Request) {
+	// if r.Method != http.MethodPost {
+	// 	msg := url.QueryEscape("Method not allowed")
+	// 	http.Redirect(w, r, "/?msg="+msg, http.StatusSeeOther)
+	// 	return
+	// }
+
+	sst := r.FormValue("sst")
+	name := r.FormValue("name")
+	email := r.FormValue("email")
+
+	uID, err := parseToken(sst)
+	if err != nil {
+		http.Redirect(w, r, "/?msg="+url.QueryEscape("Error parsing token"), http.StatusSeeOther)
+	}
+
+	UserDB[email] = SystemUser{
+		Username: name,
+	}
+
+	oAuthConns[uID] = email
+	fmt.Printf("email: %v", email)
+	fmt.Printf("oAuthConn: %v", oAuthConns)
+	err = createSession(email, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	http.Redirect(w, r, "/addrecord", http.StatusSeeOther)
+}
+
+func createSession(email string, w http.ResponseWriter) error {
+	fmt.Printf("Creating Session and Cookie with email: %v\n", email)
+	// create a session ID
+	sID := uuid.New().String()
+	sessions[sID] = email
+
+	// create a JWT token
+	token := createToken(sID)
+
+	// set the JWT token as a cookie on the client
+	http.SetCookie(w, &http.Cookie{
+		Name:  "sessionID",
+		Value: token,
+	})
+	return nil
+}
+
+func createToken(sID string) string {
+	cc := CustomClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Minute * 30).Unix(),
+		},
+		SID: sID,
+	}
+	fmt.Printf("Custom Claims sID: %v\n", cc.SID)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, cc)
+	fmt.Printf("Token: %v\n", token)
+	//Add Vault Transit
+	st, err := token.SignedString([]byte("secret"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return st
+}
+
+func parseToken(ss string) (string, error) {
+	token, err := jwt.ParseWithClaims(ss, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if token.Method != jwt.SigningMethodHS256 {
+			return nil, fmt.Errorf("error parsing token")
+		}
+		return []byte("secret"), nil
+	})
+	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
+		fmt.Printf("claims: %v\n", claims)
+	} else {
+		fmt.Printf("error: %v\n", err)
+		log.Fatal(err)
+	}
+	fmt.Printf("parsed claims: %v\n", token.Claims.(*CustomClaims))
+	return token.Claims.(*CustomClaims).SID, nil
 }
 
 // Dbview ...
@@ -142,10 +361,6 @@ func Addrecord(w http.ResponseWriter, req *http.Request) {
 		u.Ssn = ctxt
 		fmt.Printf("user record to add post encrypt: %v\n", u)
 
-		/*
-			SQLQuery = "INSERT INTO vault_go_demo (FIRST, LAST, SSN, ADDR, BDAY, SALARY) VALUES('Bill', 'Franklin', '111-22-8084', '222 Chicago Street', '1985-02-02', 180000.00);"
-			DB.Exec(SQLQuery)
-		*/
 		_, err = config.DB.Exec("INSERT INTO vault_go_demo (FIRST, LAST, SSN, ADDR, BDAY, SALARY) VALUES ($1, $2, $3, $4, $5, $6)", u.First, u.Last, u.Ssn, u.Addr, u.Bday, u.Salary)
 		if err != nil {
 			log.Fatal(err)
@@ -154,7 +369,29 @@ func Addrecord(w http.ResponseWriter, req *http.Request) {
 
 		http.Redirect(w, req, "/records", http.StatusSeeOther)
 	}
-	err := config.TPL.ExecuteTemplate(w, "addrecord.gohtml", nil)
+
+	c, err := req.Cookie("sessionID")
+	fmt.Printf("Add Record Cookie: %v\n", c)
+	if err != nil {
+		fmt.Printf("Cookie was empty: %v\n", err)
+		c = &http.Cookie{
+			Name:  "sessionID",
+			Value: "",
+		}
+	}
+
+	sID, err := parseToken(c.Value)
+	fmt.Printf("parse token sID: %v\n", sID)
+	if err != nil {
+		log.Println("index parseToken error: ", err)
+	}
+
+	var e string
+	if sID != "" {
+		e = sessions[sID]
+	}
+
+	err = config.TPL.ExecuteTemplate(w, "addrecord.gohtml", e)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

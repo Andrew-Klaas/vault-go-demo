@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Andrew-klaas/vault-go-demo/users"
+	"github.com/Andrew-Klaas/vault-go-demo/users"
 )
 
 func TestIndex(t *testing.T) {
