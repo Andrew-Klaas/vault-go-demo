@@ -1,12 +1,13 @@
 # Start from a Debian image with the latest version of Go installed
 # and a workspace (GOPATH) configured at /go.
-FROM golang:1.16-alpine
+FROM golang:1.20.3-alpine
 ADD . /go/src/github.com/Andrew-Klaas/vault-go-demo
 WORKDIR /go/src/github.com/Andrew-Klaas/vault-go-demo
 
 COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
+RUN go mod tidy
 
 RUN --mount=type=ssh \
   go get github.com/Andrew-Klaas/vault-go-demo
