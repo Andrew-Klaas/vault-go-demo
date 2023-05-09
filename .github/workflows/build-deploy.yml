@@ -1,0 +1,82 @@
+name: CI/CD with EKS Deployment
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  AWS_DEFAULT_REGION: us-west-2 # Replace with your desired AWS region
+  IMAGE_NAME: my-golang-app # Replace with your desired image name
+  CONTAINER_PORT: 8080
+  CLUSTER_NAME: my-cluster # Replace with your desired cluster name
+  SERVICE_NAME: my-service # Replace with your desired service name
+  K8S_NAMESPACE: default
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.16.x'
+
+    - name: Install dependencies
+      run: go mod download
+
+    - name: Build app
+      run: |
+        go build -o demoapp ./cmd/demoapp
+
+    - name: Run tests
+      run: go test -v ./...
+
+    - name: Configure Docker credentials
+      run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Build Docker image
+      run: |
+        export DOCKER_BUILDKIT=1
+        docker build -t ${{ env.IMAGE_NAME }} .
+
+    - name: Push Docker image
+      run: |
+        docker tag ${{ env.IMAGE_NAME }} "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+        docker push "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install AWS CLI
+      run: |
+        sudo apt-get update && sudo apt-get install -y python3-pip
+        sudo pip3 install awscli
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+    - name: Create kubectl config
+      id: kubeconfig
+      run: |
+        aws eks --region ${{ env.AWS_DEFAULT_REGION }} update-kubeconfig --name "${{ env.CLUSTER_NAME }}" --kubeconfig kubeconfig.yaml
+
+    - name: Deploy to Kubernetes
+      env:
+        KUBECONFIG: ./kubeconfig.yaml
+      run: |
+        kubectl apply -f k8s/deployment.yaml
+        kubectl rollout status deployment/${{ env.IMAGE_NAME }} -n ${{ env.K8S_NAMESPACE }}
+        kubectl apply -f k8s/service.yaml
