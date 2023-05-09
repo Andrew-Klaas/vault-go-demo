@@ -26,6 +26,8 @@ type DBuser struct {
 
 // DB Connection
 var DB *sql.DB
+var UserDB *sql.DB
+
 var AppDBuser DBuser
 var httpClient = &http.Client{
 	Timeout: 10 * time.Second,
@@ -119,7 +121,58 @@ func init() {
 	oauth2Data := oauth2VaultResp.Data["data"].(map[string]interface{})
 	Conf.ClientID = oauth2Data["client_id"].(string)
 	Conf.ClientSecret = oauth2Data["client_secret"].(string)
+
+	//Create UserDB
+	// SQLQuery = "DROP TABLE user_db;"
+	// SQLQueryConnString := "postgres://" + username.(string) + ":" + password.(string) + "@127.0.0.1:5432/user_db?sslmode=disable"
+	// UserDB, err = sql.Open("postgres", SQLQueryConnString)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// err = UserDB.Ping()
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// // Prepare the SQL insert statement
+	// sqlStatement := `
+	// INSERT INTO users (username, password)
+	// VALUES ($1, $2)
+	// RETURNING user_id`
+
+	// var exampleEmail string = "admin"
+	// user := SystemUser{
+	// 	Username: "myUsername",
+	// 	Password: encryptedPw,
+	// }
+
+	// // Execute the SQL statement with user struct values as insert arguments
+	// var userID int
+	// err = UserDB.QueryRow(sqlStatement, user.Username, user.Password).Scan(&userID)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
 }
+
+/*
+UserDB[email] = SystemUser{
+	Username: name,
+}
+
+type SystemUser struct {
+	Username string
+	Password []byte
+}
+
+var UserDB = map[string]SystemUser{
+	"admin": SystemUser{
+		Username: "admin",
+		Password: []byte("admin"),
+	},
+}
+_, err = config.DB.Exec("INSERT INTO vault_go_demo (FIRST, LAST, SSN, ADDR, BDAY, SALARY) VALUES ($1, $2, $3, $4, $5, $6)", u.First, u.Last, u.Ssn, u.Addr, u.Bday, u.Salary)
+*/
 
 // Create Table vault-go-demo (
 // 	CUST_NO SERIAL PRIMARY KEY,

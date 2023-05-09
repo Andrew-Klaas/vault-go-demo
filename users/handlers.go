@@ -319,6 +319,30 @@ func DbUserView(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func Logout(w http.ResponseWriter, req *http.Request) {
+	// get cookie
+	fmt.Printf("Logging out")
+	c, err := req.Cookie("sessionID")
+	if err != nil {
+		http.Redirect(w, req, "/", http.StatusSeeOther)
+		return
+	}
+	// delete the session
+	sID, err := parseToken(c.Value)
+	if err != nil {
+		log.Fatal(err)
+	}
+	delete(sessions, sID)
+	// remove the cookie
+	c = &http.Cookie{
+		Name:   "sessionID",
+		Value:  "",
+		MaxAge: -1,
+	}
+	http.SetCookie(w, c)
+	http.Redirect(w, req, "/", http.StatusSeeOther)
+}
+
 // Addrecord ...
 func Addrecord(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
