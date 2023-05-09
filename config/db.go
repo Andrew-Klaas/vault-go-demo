@@ -8,6 +8,7 @@ import (
 
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -51,27 +52,27 @@ var K8sAuthPath = "auth/kubernetes/login"
 func init() {
 	//Vault
 	//K8s
-	//fmt.Printf("Vault client init\n")
-	// buf, err := ioutil.ReadFile(tokenPath)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// jwt := string(buf)
-	// fmt.Printf("K8s Service Account JWT: %v\n", jwt)
+	fmt.Printf("Vault client init\n")
+	buf, err := ioutil.ReadFile(tokenPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	jwt := string(buf)
+	fmt.Printf("K8s Service Account JWT: %v\n", jwt)
 
-	// config := map[string]interface{}{
-	// 	"jwt":  jwt,
-	// 	"role": K8sAuthRole,
-	// }
+	config := map[string]interface{}{
+		"jwt":  jwt,
+		"role": K8sAuthRole,
+	}
 
-	// secret, err1 := Vclient.Logical().Write(K8sAuthPath, config)
-	// if err1 != nil {
-	// 	log.Fatal(err)
-	// }
-	// token := secret.Auth.ClientToken
+	secret, err1 := Vclient.Logical().Write(K8sAuthPath, config)
+	if err1 != nil {
+		log.Fatal(err)
+	}
+	token := secret.Auth.ClientToken
 
 	//Local
-	token := "password"
+	// token := "password"
 
 	Vclient.SetToken(token)
 

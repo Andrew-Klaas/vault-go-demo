@@ -130,15 +130,12 @@ func GoogleCallback(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Body: %v\n", string(body))
 
 	var gr googleResp
 	err = json.Unmarshal(body, &gr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Google Response JSON: %v\n", gr)
-	fmt.Printf("Google response email: %v\n", gr.Email)
 
 	// Check if the user is already in our system
 	userEmail, ok := oAuthConns[gr.ID]
@@ -155,11 +152,19 @@ func GoogleCallback(w http.ResponseWriter, req *http.Request) {
 		// We need to redirect them to the register page
 		http.Redirect(w, req, "/register?"+v.Encode(), http.StatusSeeOther)
 	}
+	fmt.Printf("User email found: %v\n", userEmail)
 	// The user existed so create a session
 	err = createSession(userEmail, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
+	c, err := req.Cookie("sessionID")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Cookie: %v\n", c)
+
 	http.Redirect(w, req, "/addrecord", http.StatusSeeOther)
 }
 
@@ -190,6 +195,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
 	http.Redirect(w, r, "/addrecord", http.StatusSeeOther)
 }
 
@@ -206,7 +212,9 @@ func createSession(email string, w http.ResponseWriter) error {
 	http.SetCookie(w, &http.Cookie{
 		Name:  "sessionID",
 		Value: token,
+		Path:  "/",
 	})
+
 	return nil
 }
 
@@ -321,7 +329,8 @@ func DbUserView(w http.ResponseWriter, req *http.Request) {
 
 func Logout(w http.ResponseWriter, req *http.Request) {
 	// get cookie
-	fmt.Printf("Logging out")
+	fmt.Printf("\nLogging out\n")
+
 	c, err := req.Cookie("sessionID")
 	if err != nil {
 		http.Redirect(w, req, "/", http.StatusSeeOther)
@@ -337,6 +346,7 @@ func Logout(w http.ResponseWriter, req *http.Request) {
 	c = &http.Cookie{
 		Name:   "sessionID",
 		Value:  "",
+		Path:   "/",
 		MaxAge: -1,
 	}
 	http.SetCookie(w, c)
