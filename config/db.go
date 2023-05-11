@@ -43,7 +43,9 @@ var Conf = &oauth2.Config{
 }
 
 // Vclient ...
-var Vclient, _ = api.NewClient(&api.Config{Address: "http://127.0.0.1:8200", HttpClient: httpClient})
+var Vclient, _ = api.NewClient(&api.Config{Address: "http://vault-ui.default.svc.cluster.local:8200", HttpClient: httpClient})
+
+//var Vclient, _ = api.NewClient(&api.Config{Address: "http://localhost:8200", HttpClient: httpClient})
 
 var tokenPath = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 var K8sAuthRole = "vault_go_demo"
@@ -66,8 +68,9 @@ func init() {
 	}
 
 	secret, err1 := Vclient.Logical().Write(K8sAuthPath, config)
+	fmt.Printf("Secret: %v\n", secret)
 	if err1 != nil {
-		log.Fatal(err)
+		log.Fatal(err1)
 	}
 	token := secret.Auth.ClientToken
 
@@ -82,7 +85,8 @@ func init() {
 	}
 	username := data.Data["username"]
 	password := data.Data["password"]
-	SQLQuery := "postgres://" + username.(string) + ":" + password.(string) + "@127.0.0.1:5432/vault_go_demo?sslmode=disable"
+	SQLQuery := "postgres://" + username.(string) + ":" + password.(string) + "@pq-postgresql.default.svc.cluster.local:5432/vault_go_demo?sslmode=disable"
+	//SQLQuery := "postgres://" + username.(string) + ":" + password.(string) + "@localhost:5432/vault_go_demo?sslmode=disable"
 
 	AppDBuser.Username = username.(string)
 	AppDBuser.Password = password.(string)
