@@ -404,23 +404,22 @@ func Addrecord(w http.ResponseWriter, req *http.Request) {
 		http.Redirect(w, req, "/records", http.StatusSeeOther)
 	}
 
+	var sID string
+	var e string
 	c, err := req.Cookie("sessionID")
-	fmt.Printf("Add Record Cookie: %v\n", c)
 	if err != nil {
 		fmt.Printf("Cookie was empty: %v\n", err)
-		c = &http.Cookie{
-			Name:  "sessionID",
-			Value: "",
+		// c = &http.Cookie{
+		// 	Name:  "sessionID",
+		// 	Value: "",
+		// }
+	} else if err == nil {
+		sID, err := parseToken(c.Value)
+		fmt.Printf("parse token sID: %v\n", sID)
+		if err != nil {
+			log.Println("index parseToken error: ", err)
 		}
 	}
-
-	sID, err := parseToken(c.Value)
-	fmt.Printf("parse token sID: %v\n", sID)
-	if err != nil {
-		log.Println("index parseToken error: ", err)
-	}
-
-	var e string
 	if sID != "" {
 		e = sessions[sID]
 	}

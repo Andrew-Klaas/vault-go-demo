@@ -3,7 +3,7 @@ export VAULT_ADDR=http://127.0.0.1:8200
 
 vault login root
 
-cat << EOF > transform-app-example.policy
+cat << EOF > transit-app-example.policy
 path "*" {
     capabilities = ["read", "list", "create", "update", "delete"]
 }
@@ -11,7 +11,7 @@ path "transit/*" {
     capabilities = ["read", "list", "create", "update", "delete"]
 }
 EOF
-vault policy write transform-app-example transform-app-example.policy
+vault policy write transit-app-example transit-app-example.policy
 
 vault secrets enable database
 
@@ -46,9 +46,7 @@ exit 0
 
 kubectl apply -f go_vault_demo/
 
-
-exit 0
-
+#Local postgres setup
 psql postgres
 CREATE USER vault WITH PASSWORD 'MySecretPassW0rd';
 ALTER USER vault WITH SUPERUSER;
