@@ -38,7 +38,7 @@ var Conf = &oauth2.Config{
 	ClientID:     "", //Set in init. Read from Vault
 	ClientSecret: "", //Set in init. Read from Vault
 	Endpoint:     google.Endpoint,
-	RedirectURL:  "http://localhost:9090/oauth2/google/callback",
+	RedirectURL:  "http://aklaas.sbx.hashidemos.io/oauth2/google/callback",
 	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 }
 

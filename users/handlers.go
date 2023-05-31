@@ -81,6 +81,7 @@ func GoogleLogin(w http.ResponseWriter, req *http.Request) {
 	// 	return
 	// }
 
+	fmt.Printf("performing google login\n")
 	sv := uuid.New()
 	url := config.Conf.AuthCodeURL(sv.String())
 	oAuthExp[sv.String()] = time.Now().Add(time.Hour)
@@ -139,7 +140,9 @@ func GoogleCallback(w http.ResponseWriter, req *http.Request) {
 
 	// Check if the user is already in our system
 	userEmail, ok := oAuthConns[gr.ID]
-	if !ok {
+	fmt.Printf(" User email: %v\n", userEmail)
+	fmt.Printf("oAuthConns: %v\n", oAuthConns)
+	if !ok || userEmail == "" {
 		jwt := createToken(gr.ID)
 
 		// If not, we need to add user email address to our system
