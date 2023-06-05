@@ -1,5 +1,7 @@
 package config
 
+//Semgrep test
+
 import (
 
 	// "database/sql"
