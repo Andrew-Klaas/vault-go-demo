@@ -7,8 +7,6 @@ import (
 	"github.com/Andrew-Klaas/vault-go-demo/users"
 )
 
-//Test
-
 func main() {
 	http.Handle("/public/", http.StripPrefix("/public", http.FileServer(http.Dir("public"))))
 
