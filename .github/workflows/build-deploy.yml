@@ -87,7 +87,7 @@ jobs:
           KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
         run: |
           echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > kubeconfig.yaml
-          kubectl config use-context us-east-1 
+          # kubectl config use-context us-east-1 
           
       - name: Deploy to EKS
         env:
