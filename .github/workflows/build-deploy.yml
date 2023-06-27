@@ -105,10 +105,8 @@ jobs:
           export APP_URL=$(kubectl get svc vault-go-demo-oauth -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
         
       - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.4.0
+        uses: zaproxy/action-baseline@v0.7.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           docker_name: 'owasp/zap2docker-stable'
-          target: 'https://www.zaproxy.org/'
-          rules_file_name: 'zap-baseline.py'
-          cmd_options: '-t https:${APP_URL}'
+          target: 'http://${APP_URL}:9090''
