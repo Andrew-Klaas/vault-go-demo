@@ -62,35 +62,36 @@ jobs:
           push: true
           tags: aklaas2/vault-go-demo-oauth:latest
 
-  # deploy:
-  #   runs-on: ubuntu-20.04
-  #   steps:
-  #     - uses: actions/checkout@v3
+  deploy:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
 
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: us-east-1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
           
-  #     - name: Install kubectl
-  #       run: |
-  #         sudo apt-get update && sudo apt-get install -y ca-certificates curl apt-transport-https
-  #         curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
-  #         echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-  #         sudo apt-get update
-  #         sudo apt-get install -y kubectl
+      - name: Install kubectl
+        run: |
+          sudo apt-get update && sudo apt-get install -y ca-certificates curl apt-transport-https
+          curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+          sudo apt-get update
+          sudo apt-get install -y kubectl
           
-  #     - name: Configure kubectl
-  #       env:
-  #         KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
-  #       run: |
-  #         echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > kubeconfig.yaml
-  #         kubectl config use-context us-east-1 
+      - name: Configure kubectl
+        env:
+          KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > kubeconfig.yaml
+          kubectl config use-context us-east-1 
           
-  #     - name: Deploy to EKS
-  #       env:
-  #         IMAGE_TAG: latest
-  #       run: kubectl apply -f new_vault-go-demo/
+      - name: Deploy to EKS
+        env:
+          IMAGE_TAG: latest
+          KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: kubectl apply -f demo/new_vault-go-demo/
   
