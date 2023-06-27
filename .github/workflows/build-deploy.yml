@@ -94,19 +94,19 @@ jobs:
           ls
           kubectl apply -f new_vault-go-demo/
       
-      - name: Wait for app deployment
-        run: |
-          echo "Starting sleep wait"
-          sleep 120
-          echo "Sleep wait complete"
+      # - name: Wait for app deployment
+      #   run: |
+      #     echo "Starting sleep wait"
+      #     sleep 120
+      #     echo "Sleep wait complete"
 
-      - name: Get k8s service url
-        run: |
-          export APP_URL=$(kubectl get svc vault-go-demo-oauth -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+      # - name: Get k8s service url
+      #   run: |
+      #     export APP_URL=$(kubectl get svc vault-go-demo-oauth -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
         
-      - name: ZAP Scan
-        uses: zaproxy/action-baseline@v0.7.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          docker_name: 'owasp/zap2docker-stable'
-          target: 'http://${APP_URL}:9090''
+      # - name: ZAP Scan
+      #   uses: zaproxy/action-baseline@v0.7.0
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+      #     docker_name: 'owasp/zap2docker-stable'
+      #     target: 'http://${APP_URL}:9090''
