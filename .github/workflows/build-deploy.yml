@@ -94,6 +94,6 @@ jobs:
           KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
         run: |
          export KUBECONFIG=kubeconfig.yaml
-         kubectl config use-context-us-east-1
+         kubectl config use-context us-east-1
          kubectl apply -f demo/new_vault-go-demo/
   
