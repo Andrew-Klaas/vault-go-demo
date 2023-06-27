@@ -87,11 +87,13 @@ jobs:
           KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
         run: |
           echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > kubeconfig.yaml
-          # kubectl config use-context us-east-1 
           
       - name: Deploy to EKS
         env:
           IMAGE_TAG: latest
           KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
-        run: kubectl apply -f demo/new_vault-go-demo/
+        run: |
+         export KUBECONFIG=kubeconfig.yaml
+         kubectl config use-context-us-east-1
+         kubectl apply -f demo/new_vault-go-demo/
   
