@@ -212,10 +212,12 @@ func createSession(email string, w http.ResponseWriter) error {
 	token := createToken(sID)
 
 	// set the JWT token as a cookie on the client
+	// HttpOnly is set to false for demo purposes
 	http.SetCookie(w, &http.Cookie{
-		Name:  "sessionID",
-		Value: token,
-		Path:  "/",
+		Name:     "sessionID",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: false,
 	})
 
 	return nil
