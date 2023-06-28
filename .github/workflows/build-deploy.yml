@@ -103,6 +103,7 @@ jobs:
       - name: Get k8s service url
         run: |
           echo "APP_URL=$(kubectl get svc vault-go-demo-oauth -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')" >> $GITHUB_ENV
+
         
       - name: ZAP Scan
         uses: zaproxy/action-baseline@v0.7.0
