@@ -113,10 +113,10 @@ func init() {
 	DB.Exec(SQLQuery)
 	SQLQuery = "INSERT INTO vault_go_demo (FIRST, LAST, SSN, ADDR, BDAY, SALARY) VALUES('Jane', 'Smith', '765-24-2083', '331 Johnson Street', '1985-02-02', 120000.00);"
 	DB.Exec(SQLQuery)
-	SQLQuery = "INSERT INTO vault_go_demo (FIRST, LAST, SSN, ADDR, BDAY, SALARY) VALUES('Ben', 'Washington', '111-22-8084', '222 Chicago Street', '1985-02-02', 180000.00);"
+	SQLQuery = "INSERT INTO vault_go_demo (FIRST, LAST, SSN, ADDR, BDAY, SALARY) VALUES('Ben', 'Franklin', '111-22-8084', '222 Chicago Street', '1985-02-02', 180000.00);"
 	DB.Exec(SQLQuery)
-	SQLQuery = "INSERT INTO vault_go_demo (FIRST, LAST, SSN, ADDR, BDAY, SALARY) VALUES('Bill', 'Franklin', '111-22-8084', '222 Chicago Street', '1985-02-02', 180000.00);"
-	DB.Exec(SQLQuery)
+	// SQLQuery = "INSERT INTO vault_go_demo (FIRST, LAST, SSN, ADDR, BDAY, SALARY) VALUES('Bill', 'Franklin', '111-22-8084', '222 Chicago Street', '1985-02-02', 180000.00);"
+	// DB.Exec(SQLQuery)
 
 	//setup Oauth2 config
 	oauth2VaultResp, err := Vclient.Logical().Read("secret/data/oauth2/config")

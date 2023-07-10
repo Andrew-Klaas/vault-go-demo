@@ -290,7 +290,7 @@ func Records(w http.ResponseWriter, req *http.Request) {
 		log.Fatal(err)
 	}
 
-	// fmt.Printf("users records BEFORE decrypt %v\n", cRecords)
+	fmt.Printf("users records BEFORE decrypt %v\n", cRecords)
 	for i := 3; i < len(cRecords); i++ {
 		u := cRecords[i]
 		data := map[string]interface{}{
