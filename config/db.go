@@ -43,7 +43,7 @@ var Conf = &oauth2.Config{
 }
 
 // Vclient ...
-var Vclient, _ = api.NewClient(&api.Config{Address: "http://vault-ui.default.svc.cluster.local:8200", HttpClient: httpClient})
+var Vclient, _ = api.NewClient(&api.Config{Address: "http://127.0.0.1:8200", HttpClient: httpClient})
 
 //var Vclient, _ = api.NewClient(&api.Config{Address: "http://localhost:8200", HttpClient: httpClient})
 
@@ -85,7 +85,7 @@ func init() {
 	}
 	username := data.Data["username"]
 	password := data.Data["password"]
-	SQLQuery := "postgres://" + username.(string) + ":" + password.(string) + "@pq-postgresql.default.svc.cluster.local:5432/vault_go_demo?sslmode=disable"
+	SQLQuery := "postgres://" + username.(string) + ":" + password.(string) + "@127.0.0.1:5432/vault_go_demo?sslmode=disable"
 	//SQLQuery := "postgres://" + username.(string) + ":" + password.(string) + "@localhost:5432/vault_go_demo?sslmode=disable"
 
 	AppDBuser.Username = username.(string)
@@ -120,13 +120,13 @@ func init() {
 	//test
 
 	//setup Oauth2 config
-	oauth2VaultResp, err := Vclient.Logical().Read("secret/data/oauth2/config")
-	if err != nil {
-		log.Fatal(err)
-	}
-	oauth2Data := oauth2VaultResp.Data["data"].(map[string]interface{})
-	Conf.ClientID = oauth2Data["client_id"].(string)
-	Conf.ClientSecret = oauth2Data["client_secret"].(string)
+	// oauth2VaultResp, err := Vclient.Logical().Read("secret/data/oauth2/config")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// oauth2Data := oauth2VaultResp.Data["data"].(map[string]interface{})
+	// Conf.ClientID = oauth2Data["client_id"].(string)
+	// Conf.ClientSecret = oauth2Data["client_secret"].(string)
 
 	//Create UserDB
 	// SQLQuery = "DROP TABLE user_db;"

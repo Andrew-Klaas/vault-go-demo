@@ -19,12 +19,11 @@ func main() {
 
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 
-	http.HandleFunc("/oauth2/google/login", users.GoogleLogin)
-	http.HandleFunc("/oauth2/google/callback", users.GoogleCallback)
-	http.HandleFunc("/register", users.Register)
-	http.HandleFunc("/logout", users.Logout)
+	// http.HandleFunc("/oauth2/google/login", users.GoogleLogin)
+	// http.HandleFunc("/oauth2/google/callback", users.GoogleCallback)
+	// http.HandleFunc("/register", users.Register)
+	// http.HandleFunc("/logout", users.Logout)
 
 	log.Println("Listening on port 9090...")
 	http.ListenAndServe(":9090", nil)
-
 }

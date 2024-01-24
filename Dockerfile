@@ -28,6 +28,10 @@ ENTRYPOINT /go/bin/vault-go-demo
 # Document that the service listens on port 8080.
 EXPOSE 9090
 
+
+#docker build --platform linux/amd64 -t aklaas2/vault-go-demo .;docker push aklaas2/vault-go-demo:latest
+
+
 #docker build --platform linux/amd64 -t aklaas2/vault-go-demo-oauth .;docker push aklaas2/vault-go-demo-oauth:latest
 
 
