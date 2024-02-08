@@ -52,8 +52,6 @@ var K8sAuthRole = "vault_go_demo"
 var K8sAuthPath = "auth/kubernetes/login"
 
 func init() {
-	//Vault
-	//K8s
 	fmt.Printf("Vault client init\n")
 	buf, err := ioutil.ReadFile(tokenPath)
 	if err != nil {
@@ -73,10 +71,6 @@ func init() {
 		log.Fatal(err1)
 	}
 	token := secret.Auth.ClientToken
-
-	//Local
-	// token := "password"
-
 	Vclient.SetToken(token)
 
 	data, err := Vclient.Logical().Read("database/creds/vault_go_demo")
@@ -85,9 +79,8 @@ func init() {
 	}
 	username := data.Data["username"]
 	password := data.Data["password"]
-	SQLQuery := "postgres://" + username.(string) + ":" + password.(string) + "@127.0.0.1:5432/vault_go_demo?sslmode=disable"
-	//SQLQuery := "postgres://" + username.(string) + ":" + password.(string) + "@localhost:5432/vault_go_demo?sslmode=disable"
 
+	SQLQuery := "postgres://" + username.(string) + ":" + password.(string) + "@127.0.0.1:5432/vault_go_demo?sslmode=disable"
 	AppDBuser.Username = username.(string)
 	AppDBuser.Password = password.(string)
 
