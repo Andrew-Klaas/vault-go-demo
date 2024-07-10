@@ -1,7 +1,6 @@
 # Start from a Debian image with the latest version of Go installed
 # and a workspace (GOPATH) configured at /go.
-FROM golang:1.20.3-alpine
-
+FROM golang:latest
 
 ENV GOOS linux
 ENV GOARCH amd64
