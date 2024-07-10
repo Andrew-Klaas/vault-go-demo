@@ -6,32 +6,22 @@ on:
     - main
     - master
     paths:
-    - .github/workflows/semgrep.yml
+    - .github/workflows/build-deploy.yml
   schedule:
   # random HH:MM to avoid a load spike on GitHub Actions at 00:00
   - cron: 32 1 * * *
 
-env:
-  RELEASE_REVISION: "pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
-  KUBE_NAMESPACE: production
-  ECR_REPOSITORY: my-cool-application
-
-name: Semgrep
 jobs:
-  semgrep:
-    name: semgrep/ci
-    runs-on: ubuntu-20.04
+  wiz-cli-image-scan:
+    name: 'Wiz-cli Image Scan'
+    runs-on: ubuntu-latest
     env:
-      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-    container:
-      image: returntocorp/semgrep
-    steps:
-    - uses: actions/checkout@v3
-    - run: semgrep ci 
-    - run: semgrep ci --supply-chain
+      SCAN_PATH: "." # Set the relative path in the repo to build the image from
+      TAG: "wiz-cli-gha-example" # Set the tag to use for the image
+      POLICY: "Default vulnerabilities policy" # Set the desired Wiz CLI policy to use
+    defaults:
+      run:
+        shell: bash
 
   build:
     runs-on: ubuntu-20.04
@@ -54,6 +44,21 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build the Docker image
+        run: cd $SCAN_PATH && docker build . --tag $TAG # Configure to fit the params you use to build your image
+
+      - name: Download Wiz CLI
+        run: curl -o wizcli https://downloads.wiz.io/wizcli/latest/wizcli-linux-amd64 && chmod +x wizcli
+
+      - name: Authenticate to Wiz
+        run: ./wizcli auth --id "$WIZ_CLIENT_ID" --secret "$WIZ_CLIENT_SECRET"
+        env:
+          WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
+          WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
+
+      - name: Run wiz-cli docker image scan
+        run: ./wizcli docker scan --image $TAG --policy "$POLICY"
     
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
@@ -62,46 +67,46 @@ jobs:
           push: true
           tags: aklaas2/vault-go-demo-oauth:latest
 
-  deploy:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
+  # deploy:
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: us-east-1
           
-      - name: Install kubectl
-        run: |
-          sudo apt-get update && sudo apt-get install -y ca-certificates curl apt-transport-https
-          curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
-          echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-          sudo apt-get update
-          sudo apt-get install -y kubectl
+  #     - name: Install kubectl
+  #       run: |
+  #         sudo apt-get update && sudo apt-get install -y ca-certificates curl apt-transport-https
+  #         curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+  #         echo "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+  #         sudo apt-get update
+  #         sudo apt-get install -y kubectl
           
-      - name: Configure kubectl
-        run: |
-          mkdir ${HOME}/.kube
-          echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
+  #     - name: Configure kubectl
+  #       run: |
+  #         mkdir ${HOME}/.kube
+  #         echo ${{ secrets.KUBE_CONFIG }} | base64 --decode > ${HOME}/.kube/config
 
-      - name: use context
-        run: |
-          kubectl config use-context us-east-1
+  #     - name: use context
+  #       run: |
+  #         kubectl config use-context us-east-1
 
-      - name: Deploy to EKS
-        run: |
-          kubectl apply -f new_vault-go-demo/
+  #     - name: Deploy to EKS
+  #       run: |
+  #         kubectl apply -f new_vault-go-demo/
       
-      - name: Wait for app deployment
-        run: |
-          echo "Starting sleep wait"
-          sleep 60
-          echo "Sleep wait complete"
-      #test 
-      - name: ZAP Scan
-        uses: zaproxy/action-baseline@v0.7.0
-        with:
-          target: "http://dev.andrewlklaas.com"
+  #     - name: Wait for app deployment
+  #       run: |
+  #         echo "Starting sleep wait"
+  #         sleep 60
+  #         echo "Sleep wait complete"
+  #     #test 
+  #     - name: ZAP Scan
+  #       uses: zaproxy/action-baseline@v0.7.0
+  #       with:
+  #         target: "http://dev.andrewlklaas.com"
