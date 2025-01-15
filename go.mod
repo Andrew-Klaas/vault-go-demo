@@ -1,6 +1,6 @@
 module github.com/Andrew-Klaas/vault-go-demo
 
-go 1.22.5
+go 1.23.4
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
