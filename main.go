@@ -1,13 +1,16 @@
 package main
+
 //test
-
-
 import (
 	"log"
 	"net/http"
 
 	"github.com/Andrew-Klaas/vault-go-demo/users"
 )
+
+// FAKE
+var AccessKeyId = "ASIAIOSFODNN7EXAMPLE"
+var SecretAccessKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 
 func main() {
 	http.Handle("/public/", http.StripPrefix("/public", http.FileServer(http.Dir("public"))))
@@ -28,7 +31,5 @@ func main() {
 
 	log.Println("Listening on port 9090...")
 	http.ListenAndServe(":9090", nil)
-
-	
 
 }

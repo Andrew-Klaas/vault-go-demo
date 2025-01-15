@@ -51,6 +51,10 @@ var tokenPath = "/var/run/secrets/kubernetes.io/serviceaccount/token"
 var K8sAuthRole = "vault_go_demo"
 var K8sAuthPath = "auth/kubernetes/login"
 
+// FAKE
+var AccessKeyId = "ASIAIOSFODNN7EXAMPLE"
+var SecretAccessKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+
 func init() {
 	//Vault
 	//K8s
