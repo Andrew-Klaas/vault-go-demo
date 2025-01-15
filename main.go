@@ -1,6 +1,5 @@
 package main
 
-//test
 import (
 	"log"
 	"net/http"
@@ -9,6 +8,7 @@ import (
 )
 
 // FAKE
+// Test
 var AccessKeyId = "ASIAIOSFODNN7EXAMPLE"
 var SecretAccessKey = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 
