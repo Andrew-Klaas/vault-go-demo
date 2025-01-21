@@ -57,9 +57,6 @@ jobs:
 
       - name: Run wiz-cli docker image scan
         run: ./wizcli docker scan --image $TAG --policy "$POLICY"
-
-      - name: Run wiz-cli docker tag
-        run: ./wizcli docker tag --image $TAG
     
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
