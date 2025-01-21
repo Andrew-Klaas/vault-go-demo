@@ -44,10 +44,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build the Docker image
-        run: cd $SCAN_PATH && docker build . --tag $TAG # Configure to fit the params you use to build your image
+        run: cd $SCAN_PATH && docker build . --tag aklaas2/vault-go-demo:latest
 
       - name: Download Wiz CLI
-        run: sudo curl -o wizcli https://downloads.wiz.io/wizcli/latest/wizcli-linux-amd64 && chmod +x wizcli
+        run: curl -o wizcli https://downloads.wiz.io/wizcli/latest/wizcli-linux-amd64 && chmod +x wizcli
 
       - name: Authenticate to Wiz
         run: sudo ./wizcli auth --id "$WIZ_CLIENT_ID" --secret "$WIZ_CLIENT_SECRET"
@@ -56,17 +56,19 @@ jobs:
           WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
 
       - name: Run wiz-cli docker image scan
-        run: sudo ./wizcli docker scan --image aklaas2/vault-go-demo:latest --policy "$POLICY"
-    
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: aklaas2/vault-go-demo:latest
+        run: ./wizcli docker scan --image aklaas2/vault-go-demo:latest --policy "$POLICY"
 
       - name: Run wiz-cli docker image tag
-        run: sudo ./wizcli docker tag --image aklaas2/vault-go-demo:latest 
+        run: ./wizcli docker tag --image aklaas2/vault-go-demo:latest 
+    
+      # - name: Build and push Docker image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: .
+      #     push: true
+      #     tags: aklaas2/vault-go-demo:latest
+
+
       
 
   # deploy:
